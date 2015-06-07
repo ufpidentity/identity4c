@@ -6,6 +6,7 @@
 
 /* Cipher suites, https://www.openssl.org/docs/apps/ciphers.html */
 const char *const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!SRP:!PSK:!CAMELLIA:!RC4:!MD5:!DSS";
+const char *const IDENTITY_ERROR_XML = "<context><name>Unknown</name><result xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"defaultResult\" message=\"Identity Service Failure : %d\">RESET</result></context>";
 
 int verify_callback(int preverify, X509_STORE_CTX * x509_ctx);
 void init_openssl_library(void);
@@ -358,11 +359,13 @@ char *perform_read(BIO * web)
             }
         }
 
-        if (data_length > 0) {
+        if ((status == 200) && (data_length > 0)) {
             response = (char *) malloc(data_length + 1);
             memset(response, 0, data_length + 1);
             memcpy(response, data + pret, data_length);
-        }
+        } else
+            asprintf(&response, IDENTITY_ERROR_XML, status);
+
     } else if (pret <= 0) {
         fprintf(stderr, "error parsing: %d\n", pret);
     }
