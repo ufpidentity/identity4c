@@ -2,5 +2,5 @@
 
 char *get_host()
 {
-    return "development.ufp.com";
+    return "identity.ufp.com";
 }
