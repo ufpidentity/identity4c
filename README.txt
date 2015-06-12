@@ -1,2 +1,0 @@
-gcc -I /usr/include/libxml2/ -I /usr/include/openssl/ -o identity identity.c identity-openssl-bridge.c strmap.c identity-resolver.c picohttpparser.c identity-xml-parser.c -lssl -lcrypto -lxml2
-gcc --shared -fPIC -I /usr/include/libxml2/ -I /usr/include/openssl/ -o identity.so identity.c identity-openssl-bridge.c strmap.c identity-resolver.c picohttpparser.c identity-xml-parser.c -lssl -lcrypto -lxml2 -lrt

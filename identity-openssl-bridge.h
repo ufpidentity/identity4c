@@ -15,6 +15,7 @@
 
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
+#include <openssl/engine.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
