@@ -1,0 +1,20 @@
+UFP Identity C library
+
+Build & install by running:
+ * ./autogen.sh
+ * ./configure
+ * make
+ * make install-strip
+
+If you don't have access to "sudo", you have to manually become "root"
+prior to calling "make install-strip".
+
+This library requires OpenSSL and libxml2. Two additional libraries
+are included as source
+
+* [StrMap](http://pokristensson.com/strmap.html)
+* [picohttpparser](https://github.com/h2o/picohttpparser)
+
+For testing standalone you can build an executable for debugging
+
+gcc -ggdb -I /usr/include/libxml2/ -I /usr/include/openssl/ -o identity identity.c identity-openssl-bridge.c strmap.c identity-resolver.c picohttpparser.c identity-xml-parser.c -lssl -lcrypto -lxml2
