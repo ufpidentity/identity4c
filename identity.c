@@ -49,9 +49,11 @@ void free_identity_context(identity_context_t * identity_context)
 authentication_pretext_t *pre_authenticate(identity_context_t * identity_context, const char *name, StrMap * sm)
 {
     sm_put(sm, "name", name);
-    char *clientip = get_clientip();
-    sm_put(sm, "client_ip", clientip);
-    free(clientip);
+    if (!sm_exists(sm, "client_ip")) {
+        char *clientip = get_clientip();
+        sm_put(sm, "client_ip", clientip);
+        free(clientip);
+    }
     char *xml = send_message(identity_context, "/identity-services/services/preauthenticate", sm);
     authentication_pretext_t *authentication_pretext = parse_authentication_pretext(xml);
     free(xml);
