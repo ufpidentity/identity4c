@@ -1,4 +1,4 @@
-#define _GNU_SOURCE 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdbool.h>
 #include "identity.h"
@@ -311,6 +311,7 @@ char *send_message(identity_context_t * identity_context, char *path, StrMap * p
     BIO_puts(web, str);
     sprintf(str, "\r\n\r\n%s", query);
     BIO_puts(web, str);
+
     char *response = perform_read(web);
     free(query);
     sm_delete(parameters);
