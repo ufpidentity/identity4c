@@ -333,19 +333,31 @@ char *perform_read(BIO * web)
     size_t data_len = 0, msg_len, last_len = 0;
 
     num_headers = sizeof(headers) / sizeof(headers[0]);
+    int fd;
+    fd_set readfds;
+    struct timeval timeout;
 
+    BIO_get_fd(web, &fd);
     do {
+        len = 0;
         char *buffer = (char *) malloc(READ_BUFFER_SIZE);
         memset(buffer, 0, READ_BUFFER_SIZE);
         /* https://www.openssl.org/docs/crypto/BIO_read.html */
-        len = BIO_read(web, buffer, READ_BUFFER_SIZE);
-        if (len > 0)
-            BIO_write(wbio, buffer, len);
-        /* BIO_should_retry returns TRUE unless there's an  */
-        /* error. We expect an error when the server        */
-        /* provides the response and closes the connection. */
+
+        FD_ZERO(&readfds);
+        FD_SET(fd, &readfds);
+
+        timeout.tv_usec = 10;
+        timeout.tv_sec = 0;
+        int nRet = select(fd+1, &readfds, NULL, NULL, &timeout);
+
+        if (nRet && FD_ISSET(fd, &readfds)) {
+            len = BIO_read(web, buffer, READ_BUFFER_SIZE);
+            if (len > 0)
+                BIO_write(wbio, buffer, len);
+        }
         free(buffer);
-    } while (len > 0 || BIO_should_retry(web));
+    } while (len > 0);
 
     char *data;
     long length = BIO_get_mem_data(wbio, &data);
