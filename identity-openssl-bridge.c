@@ -333,35 +333,29 @@ char *perform_read(BIO * web)
     size_t data_len = 0, msg_len, last_len = 0;
 
     num_headers = sizeof(headers) / sizeof(headers[0]);
-    int fd;
-    fd_set readfds;
-    struct timeval timeout;
 
-    BIO_get_fd(web, &fd);
-    do {
-        len = 0;
+    /**
+     * In testing we either see the entire response come back in the first read and any subsequent read blocks until timeout OR
+     * we see the headers come in the first read, the content in the 2nd read, and subsequent reads return immediately with length zero.
+     * High coupling to these two scenarios mitigates long blocking operations.
+     */
+
+    {
+        // first read to either get headers or entire response
         char *buffer = (char *) malloc(READ_BUFFER_SIZE);
         memset(buffer, 0, READ_BUFFER_SIZE);
         /* https://www.openssl.org/docs/crypto/BIO_read.html */
 
-        FD_ZERO(&readfds);
-        FD_SET(fd, &readfds);
-
-        timeout.tv_usec = 10;
-        timeout.tv_sec = 0;
-        int nRet = select(fd+1, &readfds, NULL, NULL, &timeout);
-
-        if (nRet && FD_ISSET(fd, &readfds)) {
-            len = BIO_read(web, buffer, READ_BUFFER_SIZE);
-            if (len > 0)
-                BIO_write(wbio, buffer, len);
-        }
+        len = BIO_read(web, buffer, READ_BUFFER_SIZE);
+        if (len > 0)
+            BIO_write(wbio, buffer, len);
         free(buffer);
-    } while (len > 0);
+    }
 
     char *data;
     long length = BIO_get_mem_data(wbio, &data);
 
+    // process the response which at least has headers
     char *response = NULL;
     pret = phr_parse_response(data, length, &minor_version, &status, &msg, &msg_len, headers, (size_t *) & num_headers, last_len);
     if (pret > 0) {
@@ -372,6 +366,22 @@ char *perform_read(BIO * web)
             if (strncasecmp(headers[i].name, "Content-Length", headers[i].name_len) == 0) {
                 data_length = atoi(headers[i].value);
             }
+        }
+
+        // 2nd+ reads to get the content
+        while (length < pret+data_length) {
+            int size = pret+data_length - length;
+            char *buffer = (char *) malloc(size);
+            memset(buffer, 0, size);
+            int len = BIO_read(web, buffer, size);
+            if (len > 0) {
+                BIO_write(wbio, buffer, len);
+                /* BIO_should_retry returns TRUE unless there's an  */
+                /* error. We expect an error when the server        */
+                /* provides the response and closes the connection. */
+            }
+            free(buffer);
+            length = BIO_get_mem_data(wbio, &data);
         }
 
         if ((status == 200) && (data_length > 0)) {
