@@ -78,14 +78,17 @@ int main(int argc, char **argv)
     identity_context_t *identity_context = get_identity_context("example.com.pem", "truststore.pem", NULL, "test");
 
     authentication_pretext_t *authentication_pretext = pre_authenticate(identity_context, "guest", sm_new(10));
+    fprintf(stdout, "pre-authenticate: %s\n", authentication_pretext->authentication_result->text);
     if (strcmp(authentication_pretext->authentication_result->message, "OK") == 0 && (strcmp(authentication_pretext->authentication_result->text, "SUCCESS") == 0)) {
         StrMap *sm = sm_new(10);
         sm_put(sm, authentication_pretext->display_items->name, "guest");
         authentication_context_t *authentication_context = authenticate(identity_context, authentication_pretext->name, sm);
+        fprintf(stdout, "authenticate: %s\n", authentication_context->authentication_result->text);
         free_authentication_context(authentication_context);
     }
     free_authentication_pretext(authentication_pretext);
 
     free_identity_context(identity_context);
+    return 0;
 }
 #endif
