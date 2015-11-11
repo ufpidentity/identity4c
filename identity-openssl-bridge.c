@@ -393,6 +393,7 @@ char *perform_read(BIO * web)
 
     } else if (pret <= 0) {
         fprintf(stderr, "error parsing: %d\n", pret);
+        asprintf(&response, IDENTITY_ERROR_XML, 500);
     }
     BIO_free_all(wbio);
     return response;
