@@ -329,7 +329,7 @@ char *perform_read(BIO * web)
     const char *msg;
     int pret, minor_version, status;
     struct phr_header headers[100];
-    int num_headers;
+    size_t num_headers;
     size_t data_len = 0, msg_len, last_len = 0;
 
     num_headers = sizeof(headers) / sizeof(headers[0]);
