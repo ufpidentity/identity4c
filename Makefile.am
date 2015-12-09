@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libufpidentity.la
 libufpidentity_la_SOURCES = identity.c identity-openssl-bridge.c identity-resolver.c identity-xml-parser.c picohttpparser.c strmap.c
 libufpidentity_la_LDFLAGS = -version-info 1:0:0
+include_HEADERS = identity.h strmap.h
 ACLOCAL_AMFLAGS=-I m4
 libufpidentity_la_CFLAGS = ${LIBXML_INCLUDES} -I ${OPENSSL_INCLUDES}
 super-clean: maintainer-clean
