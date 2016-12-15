@@ -1,6 +1,8 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdbool.h>
+#include <ifaddrs.h>
+
 #include "identity.h"
 #include "identity-resolver.h"
 #include "identity-openssl-bridge.h"
@@ -16,6 +18,29 @@ char *create_query(StrMap * parameters);
 void print_error_string(unsigned long err, const char *const label);
 char *perform_read(BIO * web);
 unsigned char *get_cn_name(const char *label, X509_NAME * const name);
+
+char *get_clientip()
+{
+    struct ifaddrs *ifaddr, *ifa;
+    int n, family;
+    char *clientip = (char *) malloc(NI_MAXHOST);
+
+    getifaddrs(&ifaddr);
+    for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+        family = ifa->ifa_addr->sa_family;
+        if (family == AF_INET || family == AF_INET6) {
+            if (strcmp(ifa->ifa_name, "lo") != 0) {
+                getnameinfo(ifa->ifa_addr, (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6), clientip, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+                break;
+            }
+        }
+    }
+    freeifaddrs(ifaddr);
+    return clientip;
+}
+
 
 bool endsWith(char *base, char *str)
 {
@@ -409,6 +434,13 @@ static void iter(const char *key, const char *value, const void *obj)
 char *create_query(StrMap * parameters)
 {
     char *query_buffer = (char *) malloc(QUERY_BUFFER_SIZE);
+
+    if (!sm_exists(parameters, "client_ip")) {
+        char *clientip = get_clientip();
+        sm_put(parameters, "client_ip", clientip);
+        free(clientip);
+    }
+
     memset(query_buffer, 0, QUERY_BUFFER_SIZE);
     sm_enum(parameters, iter, query_buffer);
     query_buffer[strlen(query_buffer) - 1] = '\0';
