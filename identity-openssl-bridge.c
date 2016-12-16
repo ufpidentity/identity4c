@@ -62,12 +62,12 @@ void ssl_initialize_identity_context(identity_context_t * identity_context, char
     init_openssl_library();
 
     /* https://www.openssl.org/docs/ssl/SSL_CTX_new.html */
-    const SSL_METHOD *method = SSLv23_method();
+    const SSL_METHOD *method = TLSv1_2_method();
     ssl_err = ERR_get_error();
 
     ASSERT(NULL != method);
     if (!(NULL != method)) {
-        print_error_string(ssl_err, "SSLv23_method");
+        print_error_string(ssl_err, "TLSv1_2_method");
         //break; /* failed */
     }
 
