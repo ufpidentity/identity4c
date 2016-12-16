@@ -295,7 +295,7 @@ char *send_message(identity_context_t * identity_context, char *path, StrMap * p
     /* Error codes: http://www.openssl.org/docs/apps/verify.html  */
     res = SSL_get_verify_result(ssl);
 
-    ASSERT(X509_V_OK == res);
+    //ASSERT(X509_V_OK == res);
     if (!(X509_V_OK == res)) {
         /* Hack a code into print_error_string. */
         print_error_string((unsigned long) res, "SSL_get_verify_results");
