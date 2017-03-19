@@ -53,4 +53,8 @@ void free_authentication_pretext(authentication_pretext_t *authentication_pretex
 
 authentication_context_t *authenticate(identity_context_t *context, char *name, StrMap *sm);
 void free_authentication_context(authentication_context_t *authentication_context);
+
+// management API
+char *management(identity_context_t *context, StrMap *sm);
+char *management_find(identity_context_t *context, StrMap *sm);
 #endif /* __IDENTITY_H__ */

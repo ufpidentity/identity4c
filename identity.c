@@ -41,6 +41,17 @@ authentication_context_t *authenticate(identity_context_t * identity_context, ch
     return authentication_context;
 }
 
+// managmeent API implementation
+char *management(identity_context_t *context, StrMap *sm)
+{
+    return send_message(context, "/identity-services/services/management", sm);
+}
+
+char *management_find(identity_context_t *context, StrMap *sm)
+{
+    return send_message(context, "/identity-services/services/management/find", sm);
+}
+
 #ifndef __PIC__
 int main(int argc, char **argv)
 {
