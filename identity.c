@@ -57,7 +57,15 @@ int main(int argc, char **argv)
 {
     identity_context_t *identity_context = get_identity_context("example.com.pem", "truststore.pem", NULL, "test");
 
-    authentication_pretext_t *authentication_pretext = pre_authenticate(identity_context, "guest", sm_new(10));
+    char *username = "guest";
+#ifdef STDIN_TEST
+    char input[100];
+    fgets(input, 100, stdin);
+    fprintf(stdout, "STDIN %s\n", input);
+    username = input;
+#endif
+
+    authentication_pretext_t *authentication_pretext = pre_authenticate(identity_context, username, sm_new(10));
     fprintf(stdout, "pre-authenticate: %s\n", authentication_pretext->authentication_result->text);
     if (strcmp(authentication_pretext->authentication_result->message, "OK") == 0 && (strcmp(authentication_pretext->authentication_result->text, "SUCCESS") == 0)) {
         StrMap *sm = sm_new(10);
