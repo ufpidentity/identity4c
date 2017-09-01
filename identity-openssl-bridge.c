@@ -156,7 +156,7 @@ char *send_message(identity_context_t * identity_context, char *path, StrMap * p
     int ret = 1;
     unsigned long ssl_err = 0;
 
-    BIO *web = NULL, *out = NULL;
+    BIO *web = NULL;
     SSL *ssl = NULL;
 
     web = BIO_new_ssl_connect(identity_context->ssl_ctx);
