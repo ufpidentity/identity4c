@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <ifaddrs.h>
+#include <syslog.h>
 
 #include "identity.h"
 #include "identity-resolver.h"
@@ -60,6 +61,7 @@ void ssl_initialize_identity_context(identity_context_t * identity_context, char
     /* Internal function that wraps the OpenSSL init's   */
     /* Cannot fail because no OpenSSL function fails ??? */
     init_openssl_library();
+    openlog("libufpidentity", LOG_PID, LOG_AUTH);
 
     /* https://www.openssl.org/docs/ssl/SSL_CTX_new.html */
     const SSL_METHOD *method = TLSv1_2_method();
@@ -145,6 +147,7 @@ void ssl_free_identity_context(identity_context_t * identity_context)
     CRYPTO_cleanup_all_ex_data();
     ERR_remove_thread_state(NULL);
     ERR_free_strings();
+    closelog();
 }
 
 char *send_message(identity_context_t * identity_context, char *path, StrMap * parameters)
@@ -527,9 +530,9 @@ void print_error_string(unsigned long err, const char *const label)
 {
     const char *const str = ERR_reason_error_string(err);
     if (str)
-        fprintf(stderr, "%s\n", str);
+        syslog(LOG_DEBUG|LOG_AUTH, "%s failed: %lu %s", label, err, str);
     else
-        fprintf(stderr, "%s failed: %lu (0x%lx)\n", label, err, err);
+        syslog(LOG_DEBUG|LOG_AUTH, "%s failed: %lu (0x%lx)", label, err, err);
 }
 
 void init_openssl_library(void)
