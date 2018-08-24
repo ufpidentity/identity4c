@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT(libufpidentity, 1.0, richardl@ufp.com)
+AC_INIT(libufpidentity, 1.1, richardl@ufp.com)
 LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([identity.c], [identity-resolver.c], [identity-xml-parser.c], [identity-openssl-bridge.c], [picohttpparser.c],  [strmap.c])
@@ -12,7 +12,7 @@ AC_PROG_CC_STDC
 AC_CHECK_HEADERS([sys/fsuid.h])
 AC_CHECK_FUNCS([setfsuid])
 
-PKG_PROG_PKG_CONFIG([0.25])
+PKG_PROG_PKG_CONFIG([0.28])
 AC_SEARCH_LIBS([xmlReadDoc], [xml2], [libxml_includes=`$PKG_CONFIG --cflags libxml-2.0`])
 AC_SEARCH_LIBS([SSL_library_init], [ssl])
 AC_SEARCH_LIBS([BIO_new], [crypto])
