@@ -12,8 +12,8 @@ AC_PROG_CC_STDC
 AC_CHECK_HEADERS([sys/fsuid.h])
 AC_CHECK_FUNCS([setfsuid])
 
-PKG_PROG_PKG_CONFIG([0.28])
-AC_SEARCH_LIBS([xmlReadDoc], [xml2], [libxml_includes=`$PKG_CONFIG --cflags libxml-2.0`])
+PKG_PROG_PKG_CONFIG([0.26])
+PKG_CHECK_MODULES([XML], [libxml-2.0], [libxml_includes=`$PKG_CONFIG --cflags libxml-2.0`])
 AC_SEARCH_LIBS([SSL_library_init], [ssl])
 AC_SEARCH_LIBS([BIO_new], [crypto])
 
