@@ -64,7 +64,7 @@ void ssl_initialize_identity_context(identity_context_t * identity_context, char
     openlog("libufpidentity", LOG_PID, LOG_AUTH);
 
     /* https://www.openssl.org/docs/ssl/SSL_CTX_new.html */
-    const SSL_METHOD *method = TLSv1_2_method();
+    const SSL_METHOD *method = TLS_method();
     ssl_err = ERR_get_error();
 
     ASSERT(NULL != method);
@@ -145,7 +145,6 @@ void ssl_free_identity_context(identity_context_t * identity_context)
     EVP_cleanup();
     sk_free((_STACK *) SSL_COMP_get_compression_methods());
     CRYPTO_cleanup_all_ex_data();
-    ERR_remove_thread_state(NULL);
     ERR_free_strings();
     closelog();
 }
