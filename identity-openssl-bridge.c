@@ -64,12 +64,12 @@ void ssl_initialize_identity_context(identity_context_t * identity_context, char
     openlog("libufpidentity", LOG_PID, LOG_AUTH);
 
     /* https://www.openssl.org/docs/ssl/SSL_CTX_new.html */
-    const SSL_METHOD *method = TLSv1_2_method();
+    const SSL_METHOD *method = TLS_method();
     ssl_err = ERR_get_error();
 
     ASSERT(NULL != method);
     if (!(NULL != method)) {
-        print_error_string(ssl_err, "TLSv1_2_method");
+        print_error_string(ssl_err, "TLS_method");
         //break; /* failed */
     }
 
@@ -82,6 +82,15 @@ void ssl_initialize_identity_context(identity_context_t * identity_context, char
     if (!(ctx != NULL)) {
         print_error_string(ssl_err, "SSL_CTX_new");
         //break; /* failed */
+    }
+
+    if (SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION) != 1 ||
+        SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION) != 1) {
+        ssl_err = ERR_get_error();
+        print_error_string(ssl_err, "SSL_CTX_set_proto_version");
+        SSL_CTX_free(ctx);
+        identity_context->ssl_ctx = NULL;
+        return;
     }
 
     /* https://www.openssl.org/docs/ssl/ctx_set_verify.html */
@@ -123,13 +132,13 @@ void ssl_initialize_identity_context(identity_context_t * identity_context, char
     }
     //SSL_CTX_set_default_passwd_cb(ctx, &pem_passwd_cb);
     SSL_CTX_set_default_passwd_cb_userdata(ctx, (void *) key_password);
-    res = SSL_CTX_use_RSAPrivateKey_file(ctx, (key_file_name != NULL) ? key_file_name : certificate_file_name, SSL_FILETYPE_PEM);
+    res = SSL_CTX_use_PrivateKey_file(ctx, (key_file_name != NULL) ? key_file_name : certificate_file_name, SSL_FILETYPE_PEM);
     ssl_err = ERR_get_error();
 
     ASSERT(1 == res);
     if (!(1 == res)) {
         /* Non-fatal, but something else will probably break later */
-        print_error_string(ssl_err, "SSL_CTX_use_RSAPrivatekey_file");
+        print_error_string(ssl_err, "SSL_CTX_use_PrivateKey_file");
         /* break; */
     }
     identity_context->ssl_ctx = ctx;
